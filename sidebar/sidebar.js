@@ -1,5 +1,16 @@
 const sidebarTemplate = document.createElement("template");
 
+const sidebarTasksTemplate = (task) => {
+    return `
+        <div class="sidebar-content-title">${task.task_title}</div>
+        <ul class="sidebar-content-con">
+            ${task.assets.map(asset => {
+                return `<li>${asset.asset_title}</li>`;
+            }).join("")}
+        </ul>
+    `
+};
+
 sidebarTemplate.innerHTML = `
 <div class="sidebar">
     <div class="sidebar-title-con">
@@ -12,13 +23,7 @@ sidebarTemplate.innerHTML = `
     </div>
     <div class="sidebar-collapsed-content"></div>
     <div class="sidebar-content">
-        <div class="sidebar-content-title">Explore the world of management</div>
-        <ul class="sidebar-content-con">
-            <li>Technical Project Management</li>
-            <li>Threadbuild</li>
-            <li>Structure your pointers</li>
-            <li>4SA Method</li>
-        </ul>
+        
     </div>
 </div>
 <style>
@@ -61,6 +66,7 @@ sidebarTemplate.innerHTML = `
         padding: 4px;
         background-color: white;
         border-radius: 50%;
+        cursor: pointer;
     }
     .sidebar-collapsed-content {
         line-height: 1.8rem;
@@ -106,7 +112,7 @@ class Sidebar extends HTMLElement {
         this.shadowRoot.appendChild(sidebarTemplate.content.cloneNode(true));
 
         this.expanded = false;
-        this.notificationCount = 1;
+        this.tasksCount = 0;
 
         const sidebar = this.shadowRoot.querySelector(".sidebar");
         const sidebarExpandIcon = this.shadowRoot.querySelector("img.sidebar-expand-icon");
@@ -115,7 +121,7 @@ class Sidebar extends HTMLElement {
         const sidebarCollapsedContent = this.shadowRoot.querySelector("div.sidebar-collapsed-content");
         const sidebarContent = this.shadowRoot.querySelector("div.sidebar-content");
 
-        sidebarCollapsedContent.innerHTML = this.notificationCount;
+        sidebarCollapsedContent.innerHTML = this.tasksCount;
 
         sidebarExpandIcon.addEventListener("click", () => {
             sidebar.style.width = sidebar.style.width === "400px" ? "130px" : "400px";
@@ -131,6 +137,24 @@ class Sidebar extends HTMLElement {
                 sidebarContent.style.display = "none";
             }
         });
+    }
+
+    static get observedAttributes() {
+        return ['tasks'];
+    }
+
+    attributeChangedCallback(name, _, newValue) {
+        if(name === 'tasks') {
+            this.tasks = JSON.parse(newValue);
+            this.tasksCount = this.tasks?.length || 0;
+            const sidebarCollapsedContent = this.shadowRoot.querySelector("div.sidebar-collapsed-content");
+            sidebarCollapsedContent.innerHTML = this.tasksCount;
+
+            const sidebarContent = this.shadowRoot.querySelector(".sidebar-content");
+            this.tasks.forEach(task => {
+                sidebarContent.innerHTML += sidebarTasksTemplate(task);
+            });
+        }
     }
 }
 
