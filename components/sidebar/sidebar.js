@@ -111,30 +111,32 @@ class Sidebar extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         this.shadowRoot.appendChild(sidebarTemplate.content.cloneNode(true));
 
+        this.sidebarElement = this.shadowRoot.querySelector(".sidebar");
+        this.sidebarExpandIcon = this.shadowRoot.querySelector("img.sidebar-expand-icon");
+        this.sidebarTitleElement = this.shadowRoot.querySelector(".sidebar-title");
+        this.sidebarCollapsedContentElement = this.shadowRoot.querySelector("div.sidebar-collapsed-content");
+        this.sidebarContentElement = this.shadowRoot.querySelector("div.sidebar-content");
+
         this.expanded = false;
         this.tasksCount = 0;
 
-        const sidebar = this.shadowRoot.querySelector(".sidebar");
-        const sidebarExpandIcon = this.shadowRoot.querySelector("img.sidebar-expand-icon");
 
-        const sidebarTitle = this.shadowRoot.querySelector(".sidebar-title");
-        const sidebarCollapsedContent = this.shadowRoot.querySelector("div.sidebar-collapsed-content");
-        const sidebarContent = this.shadowRoot.querySelector("div.sidebar-content");
 
-        sidebarCollapsedContent.innerHTML = this.tasksCount;
+        this.sidebarCollapsedContentElement.innerHTML = this.tasksCount;
 
-        sidebarExpandIcon.addEventListener("click", () => {
-            sidebar.style.width = sidebar.style.width === "400px" ? "130px" : "400px";
+        this.sidebarExpandIcon.addEventListener("click", () => {
+            this.sidebarElement.style.width = this.sidebarElement.style.width === "400px" ? "130px" : "400px";
             this.expanded = !this.expanded;
-            sidebarExpandIcon.style.transform = this.expanded ? `rotateY(180deg)` : `rotateY(0)`;
+            this.sidebarExpandIcon.style.transform = this.expanded ? `rotateY(180deg)` : `rotateY(0)`;
+
             if(this.expanded) {
-                sidebarTitle.style.display = "flex";
-                sidebarCollapsedContent.style.display = "none";
-                sidebarContent.style.display = "flex";
+                this.sidebarTitleElement.style.display = "flex";
+                this.sidebarCollapsedContentElement.style.display = "none";
+                this.sidebarContentElement.style.display = "flex";
             } else {
-                sidebarTitle.style.display = "none";
-                sidebarCollapsedContent.style.display = "flex";
-                sidebarContent.style.display = "none";
+                this.sidebarTitleElement.style.display = "none";
+                this.sidebarCollapsedContentElement.style.display = "flex";
+                this.sidebarContentElement.style.display = "none";
             }
         });
     }
@@ -147,12 +149,12 @@ class Sidebar extends HTMLElement {
         if(name === 'tasks') {
             this.tasks = JSON.parse(newValue);
             this.tasksCount = this.tasks?.length || 0;
-            const sidebarCollapsedContent = this.shadowRoot.querySelector("div.sidebar-collapsed-content");
-            sidebarCollapsedContent.innerHTML = this.tasksCount;
+            this.sidebarCollapsedContentElement = this.shadowRoot.querySelector("div.sidebar-collapsed-content");
+            this.sidebarCollapsedContentElement.innerHTML = this.tasksCount;
 
-            const sidebarContent = this.shadowRoot.querySelector(".sidebar-content");
+            this.sidebarContentElement = this.shadowRoot.querySelector(".sidebar-content");
             this.tasks.forEach(task => {
-                sidebarContent.innerHTML += sidebarTasksTemplate(task);
+                this.sidebarContentElement.innerHTML += sidebarTasksTemplate(task);
             });
         }
     }

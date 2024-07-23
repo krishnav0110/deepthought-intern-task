@@ -1,3 +1,5 @@
+import { displayAssetTemplate, inputThreadBuilderAssetTemplate, inputArticleAssetTemplate } from "./assetTemplates.js";
+
 const assetTemplate = document.createElement("template");
 
 assetTemplate.innerHTML = `
@@ -10,19 +12,18 @@ assetTemplate.innerHTML = `
         <span class="desc-title">Description:</span>
         <span class="desc-desc"></span>
     </div>
-    <img
-        class="yt-img"
-        src="/assets/yt.png"
-        loading="lazy"
-    />
+    <div class="asset-content-con">
+    
+    </div>
 </div>
 <style>
     .asset {
         display: flex;
         flex-direction: column;
-        justify-content: center;
-        width: 100%;
-        max-width: 450px;
+        justify-content: start;
+        width: 420px;
+        max-width: 420px;
+        height: 400px;
         margin: 10px 0;
         border-radius: 15px;
         box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25), 0px -4px 4px 0px rgba(0, 0, 0, 0.25);
@@ -70,9 +71,14 @@ assetTemplate.innerHTML = `
     .desc-desc {
         font-weight: 400;
     }
-    .yt-img {
-        width: 100%;
-        margin: 0 0 80px;
+    .asset-content-con {
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+        overflow-y: scroll;
+    }
+    .asset-content-con::-webkit-scrollbar {
+        width: 1px;
     }
 </style>
 `;
@@ -83,19 +89,20 @@ class Asset extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         this.shadowRoot.appendChild(assetTemplate.content.cloneNode(true));
 
+        this.descElement = this.shadowRoot.querySelector(".desc");
+        this.descDescElement = this.shadowRoot.querySelector(".desc-desc");
+        this.assetContentConElement = this.shadowRoot.querySelector(".asset-content-con");
+
         this.asset = JSON.parse(this.getAttribute('asset'));
 
         this.descElementCollapsed = true;
-        const descElement = this.shadowRoot.querySelector(".desc");
+        this.descDescElement.innerHTML = "To Explore more read more";
 
-        const descDescElement = this.shadowRoot.querySelector(".desc-desc");
-        descDescElement.innerHTML = "To Explore more read more";
-
-        descElement.addEventListener("click", () => {
+        this.descElement.addEventListener("click", () => {
             if(this.descElementCollapsed) {
-                descDescElement.innerHTML = this.asset?.asset_description || "Couldn't load the description";
+                this.descDescElement.innerHTML = this.asset?.asset_description || "Couldn't load the description";
             } else {
-                descDescElement.innerHTML = "To Explore more read more";
+                this.descDescElement.innerHTML = "To Explore more read more";
             }
             this.descElementCollapsed = !this.descElementCollapsed;
         });
@@ -108,8 +115,22 @@ class Asset extends HTMLElement {
     attributeChangedCallback(name, _, newValue) {
         if(name === 'asset') {
             this.asset = JSON.parse(newValue);
-            const assetTitle = this.shadowRoot.querySelector(".asset-title");
-            assetTitle.innerHTML = this.asset?.asset_title;
+            this.shadowRoot.querySelector(".asset-title").innerHTML = this.asset?.asset_title;
+
+            switch(this.asset.asset_type) {
+                case "display_asset":
+                    this.assetContentConElement.innerHTML = displayAssetTemplate(this.asset);
+                break;
+
+                case "input_asset":
+                    if(this.asset.asset_content_type === "threadbuilder") {
+                        this.assetContentConElement.innerHTML = inputThreadBuilderAssetTemplate(this.asset);
+                    }
+                    else if(this.asset.asset_content_type === "article") {
+                        this.assetContentConElement.innerHTML = inputArticleAssetTemplate(this.asset);
+                    }
+                break;
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
-import "./navbar/navbar.js";
-import "./asset/asset.js";
-import "./sidebar/sidebar.js";
-import "./rightSidebar/rightSidebar.js";
+import "./components/navbar/navbar.js";
+import "./components/asset/asset.js";
+import "./components/sidebar/sidebar.js";
+import "./components/rightSidebar/rightSidebar.js";
 
 window.addEventListener("load", async () => {
     const res = await fetch("http://localhost:5500/backendData/data.json");
